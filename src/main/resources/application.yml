@@ -24,4 +24,4 @@ mybatis-plus:
     db-config:
       id-type: assign_id
 reggie:
-  path: D:\瑞吉外卖\Program\imgs\
+  path: D:\瑞吉外卖\Program\RJWM\imgs\
