@@ -1,5 +1,6 @@
 package com.itheima.reggie.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.dto.DishDto;
@@ -14,15 +15,22 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/dish")
 @Slf4j
 public class DishController {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Autowired
     private DishService dishService;
@@ -43,7 +51,6 @@ public class DishController {
         log.info("dishDto:{}",dishDto);
         dishService.saveDishAndDishFlavor(dishDto); //新增菜品信息
         return R.success("新增菜品成功");
-
     }
 
     /**
@@ -102,6 +109,8 @@ public class DishController {
     @PutMapping
     public R<String> updateDishAndDishFlavor(@RequestBody DishDto dishDto) {
         dishService.updateDishAndDishFlavor(dishDto);
+        //清除对应菜品的缓存信息
+        redisTemplate.delete("dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus());
         return R.success("修改菜品成功");
     }
 
@@ -135,6 +144,17 @@ public class DishController {
      */
     @GetMapping("/list")
     public R<List<DishDto>> list(Dish dish) {
+        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
+
+        //从redis中获取菜品缓存信息
+        List<DishDto> RedisLists = (List<DishDto>) redisTemplate.opsForValue().get(key);
+
+        //如果redis中有菜品缓存信息,则直接返回
+        if (RedisLists != null) {
+            return R.success(RedisLists);
+        }
+
+        //如果redis中没有菜品缓存信息,则从数据库中查询
         //根据菜品分类id查询菜品基本信息
         LambdaQueryWrapper<Dish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(dish.getCategoryId() != null,Dish::getCategoryId,dish.getCategoryId());
@@ -143,10 +163,13 @@ public class DishController {
         lambdaQueryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
         List<Dish> list = dishService.list(lambdaQueryWrapper);
         //查询菜品口味信息,并且封装到DishDto对象中
-        List<DishDto> lists = new ArrayList<>();
-        list.forEach(D -> lists.add(dishService.getDishAndDishFlavor(D.getId())));
+        List<DishDto> DtoList = new ArrayList<>();
+        list.forEach(D -> DtoList.add(dishService.getDishAndDishFlavor(D.getId())));
 
-        return R.success(lists);
+        //将菜品缓存信息存入redis中,并且设置过期时间为60分钟
+        redisTemplate.opsForValue().set(key,DtoList,60, TimeUnit.MINUTES);
+
+        return R.success(DtoList);
     }
 
 }

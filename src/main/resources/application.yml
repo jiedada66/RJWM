@@ -13,7 +13,6 @@ spring:
     database: 0 #操作0号数据库,默认是0号数据库
     port: 6379
     host: localhost
-    client-type: jedis
 
 mybatis-plus:
   configuration:

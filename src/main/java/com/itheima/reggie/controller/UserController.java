@@ -83,6 +83,8 @@ public class UserController {
             }
             //登陆成功，将用户id存入session
             session.setAttribute("user", user.getId());
+            //删除redis中的验证码
+            // jedisPool.getResource().del(phone);
             return R.success(user);
         }
         //登录失败
