@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.result.R;
 import com.itheima.reggie.service.UserService;
-import com.itheima.reggie.util.SMSUtils;
 import com.itheima.reggie.util.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /**
+     * 发送短信验证码
+     * @param user
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/sendMsg")
     public R<String> sendMsg(@RequestBody User user) throws Exception {
         //获取手机号
@@ -48,6 +53,12 @@ public class UserController {
         return R.error("验证码发送失败");
     }
 
+    /**
+     * 登录
+     * @param map
+     * @param session
+     * @return
+     */
     @PostMapping("/login")
     public R<User> login(@RequestBody Map map, HttpSession session) {
         //获取用户输入手机号
@@ -72,6 +83,8 @@ public class UserController {
             }
             //登陆成功，将用户id存入session
             session.setAttribute("user", user.getId());
+            //删除redis中的验证码
+            // jedisPool.getResource().del(phone);
             return R.success(user);
         }
         //登录失败
