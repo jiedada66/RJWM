@@ -21,6 +21,10 @@ public class Config {
         return mybatisPlusInterceptor;
     }
 
+    /**
+     * Jedis连接池
+     * @return
+     */
     @Bean
     public JedisPool jedisPool() {
         return new JedisPool();
