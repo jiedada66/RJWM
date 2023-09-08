@@ -10,6 +10,10 @@ import com.itheima.reggie.result.R;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.SetMealDishService;
 import com.itheima.reggie.service.SetMealService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/setmeal")
 @Slf4j
+@Api(tags = "套餐相关接口")
 public class SetMealController {
 
     @Autowired
@@ -43,6 +48,7 @@ public class SetMealController {
      * @return
      */
     @PostMapping
+    @ApiOperation("新增套餐接口")
     @CacheEvict(value = "setmealCache",allEntries = true)//清空setmealCache所有缓存
     public R<String> save(@RequestBody SetMealDto setMealDto) {
         log.info("setMealDto:{}",setMealDto);
@@ -57,6 +63,12 @@ public class SetMealController {
      * @param name
      * @return
      */
+    @ApiOperation("分页查询套餐接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "当前页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页显示条数",required = true),
+            @ApiImplicitParam(name = "name",value = "套餐名称")//required = true表示必须传递
+    })
     @GetMapping("/page")
     public R<Page> page(int page, int pageSize, String name) {
         log.info("分页查询");
