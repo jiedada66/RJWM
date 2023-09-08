@@ -14,6 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -39,6 +43,7 @@ public class SetMealController {
      * @return
      */
     @PostMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)//清空setmealCache所有缓存
     public R<String> save(@RequestBody SetMealDto setMealDto) {
         log.info("setMealDto:{}",setMealDto);
         setMealService.saveWithDish(setMealDto);
@@ -91,6 +96,7 @@ public class SetMealController {
      * @return
      */
     @DeleteMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)//清空setmealCache所有缓存
     public R<String> deleteWithDish(@RequestParam List<Long> ids) {
         log.info("ids:{}",ids);
         setMealService.deleteWithDish(ids);
@@ -138,9 +144,11 @@ public class SetMealController {
      * 根据分类id和状态查询套餐
      * @param categoryId
      * @param status
+     * unless:如果返回值为null，则不缓存
      * @return
      */
     @GetMapping("/list")
+    @Cacheable(value = "setmealCache",key = "#categoryId + '_' + #status",unless = "#result == null")
     public R<List<SetMeal>> list(@RequestParam Long categoryId,@RequestParam Long status) {
         LambdaQueryWrapper<SetMeal> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(categoryId != null,SetMeal::getCategoryId,categoryId)

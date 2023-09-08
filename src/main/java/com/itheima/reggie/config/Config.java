@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
-import redis.clients.jedis.JedisPool;
 
 @Configuration
 public class Config {
@@ -20,15 +18,6 @@ public class Config {
         MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
         mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor());
         return mybatisPlusInterceptor;
-    }
-
-    /**
-     * Jedis连接池
-     * @return
-     */
-    @Bean
-    public JedisPool jedisPool() {
-        return new JedisPool();
     }
 
 

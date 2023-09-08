@@ -8,10 +8,16 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.JedisPool;
 
 @Configuration
 public class RedisConfig extends CachingConfigurerSupport {
 
+    /**
+     * RedisTemplate配置
+     * @param connectionFactory
+     * @return
+     */
     @Bean
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
@@ -21,4 +27,14 @@ public class RedisConfig extends CachingConfigurerSupport {
         redisTemplate.setConnectionFactory(connectionFactory);
         return redisTemplate;
     }
+
+    /**
+     * Jedis连接池
+     * @return
+     */
+    @Bean
+    public JedisPool jedisPool() {
+        return new JedisPool();
+    }
+
 }
