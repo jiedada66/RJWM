@@ -110,6 +110,7 @@ public class SetMealController {
      * @return
      */
     @PostMapping("/status/{sta}")
+    @CacheEvict(value = "setmealCache",allEntries = true)//清空setmealCache所有缓存
     public R<String> updateStatus(@PathVariable int sta, @RequestParam List<Long> ids) {
         log.info("sta:{},ids:{}",sta,ids);
         setMealService.updateStatus(sta,ids);
@@ -134,6 +135,7 @@ public class SetMealController {
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "setmealCache",allEntries = true)//清空setmealCache所有缓存
     public R<String> updateWithDish(@RequestBody SetMealDto setMealDto) {
         log.info("setMealDto:{}",setMealDto);
         setMealService.updateWithDish(setMealDto);
