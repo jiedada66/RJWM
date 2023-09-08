@@ -13,6 +13,9 @@ spring:
     database: 0 #操作0号数据库,默认是0号数据库
     port: 6379
     host: localhost
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存时间为30分钟
 
 mybatis-plus:
   configuration:
